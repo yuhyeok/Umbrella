@@ -1,6 +1,7 @@
 package game.helpers.collision;
 
 import java.awt.Color;
+import java.awt.Graphics;
 
 import game.helpers.geometry.Line;
 import game.helpers.geometry.Matrix;
@@ -8,22 +9,25 @@ import game.helpers.geometry.Point;
 import game.helpers.geometry.Triangle;
 import game.helpers.geometry.Vector;
 
+// Make sure that the GameObject that uses a Collider updates its refPoint
 public class Collider {
 
 	private int numVertices;
-	private Point[] vertices;
+	private Point[] relVertices;
+	private Point refPoint;
 	private Color colour;
 	
 	/**
-	 * Constructs a collider using vertices and a colour 
+	 * Constructs a collider using relative vertices to a reference point and a colour 
 	 * 
 	 * @param numVertices the number of vertices
-	 * @param vertices the list of vertices
+	 * @param relVertices list of relative vertices
+	 * @param refPoint reference point
 	 * @param colour colour to render collider
 	 */
-	public Collider(int numVertices, Point[] vertices, Color colour) {
+	public Collider(int numVertices, Point[] relVertices, Color colour) {
 		this.numVertices = numVertices;
-		this.vertices = vertices;
+		this.relVertices = relVertices;
 		this.colour = colour;
 	}
 	
@@ -34,8 +38,16 @@ public class Collider {
 	 */
 	public Collider(Collider collider) {
 		this.numVertices = collider.numVertices;
-		this.vertices = collider.vertices;
+		this.relVertices = collider.relVertices;
+		this.refPoint = collider.refPoint;
 		this.colour = collider.colour;
+	}
+	
+	public void render(Graphics g) {
+		Line[] lines = getLines();
+		g.setColor(getColour());
+		for(int i = 0; i < lines.length; i++)
+			g.drawLine((int)lines[i].p1.x, (int)lines[i].p1.y, (int)lines[i].p2.x, (int)lines[i].p2.y);
 	}
 	
 	public int getNumVertices() {
@@ -47,13 +59,31 @@ public class Collider {
 	}
 
 	public Point[] getVertices() {
-		return vertices;
-	}
-
-	public void setVertices(Point[] vertices) {
-		this.vertices = vertices;
+		Point[] absVertices = new Point[relVertices.length];
+		for(int i = 0; i < numVertices; i++) {
+			absVertices[i] = new Point(relVertices[i]);
+			absVertices[i].x += refPoint.x;
+			absVertices[i].y += refPoint.y;
+		}
+		return absVertices;
 	}
 	
+	public Point[] getRelVertices() {
+		return relVertices;
+	}
+
+	public void setRelVertices(Point[] relVertices) {
+		this.relVertices = relVertices;
+	}
+	
+	public Point getRefPoint() {
+		return refPoint;
+	}
+
+	public void setRefPoint(Point refPoint) {
+		this.refPoint = refPoint;
+	}
+
 	public Color getColour() {
 		return colour;
 	}
@@ -118,8 +148,9 @@ public class Collider {
 	 */
 	public Line[] getLines() {
 		Line[] lines = new Line[numVertices];
+		Point[] absVertices = getVertices();
 		for(int i = 0; i < numVertices; i++)
-			lines[i] = new Line(vertices[i], vertices[(i + 1) % numVertices]);
+			lines[i] = new Line(absVertices[i], absVertices[(i + 1) % numVertices]);
 		return lines;
 	}
 	
@@ -129,11 +160,12 @@ public class Collider {
 	 * @return list of triangles
 	 */
 	public Triangle[] getTriangles() {
+		Point[] absVertices = getVertices();
 		int numTriangles = numVertices - 2;
 		Triangle[] triangles = new Triangle[numTriangles];
 		
 		for(int i = 0; i < numTriangles; i++) 
-			triangles[i] = new Triangle(vertices[0], new Vector(vertices[0], vertices[i + 1]), new Vector(vertices[0], vertices[i + 2]));
+			triangles[i] = new Triangle(absVertices[0], new Vector(absVertices[0], absVertices[i + 1]), new Vector(absVertices[0], absVertices[i + 2]));
 		
 		return triangles;
 	}

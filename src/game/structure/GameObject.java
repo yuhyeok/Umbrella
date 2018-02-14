@@ -1,9 +1,9 @@
 package game.structure;
 
 import java.awt.Graphics;
-import java.awt.Rectangle;
 import java.util.LinkedList;
 
+import game.helpers.collision.Collider;
 import game.helpers.geometry.Vector;
 
 public abstract class GameObject {
@@ -11,6 +11,8 @@ public abstract class GameObject {
 	protected Vector s;
 	protected Vector v;
 	protected Vector a;
+	
+	protected Collider collider;
 	
 	protected ObjectId id;
 	
@@ -23,8 +25,6 @@ public abstract class GameObject {
 
 	public abstract void tick(LinkedList<GameObject> object);
 	public abstract void render(Graphics g);
-	
-	public abstract Rectangle getBounds();
 	
 	public Vector getS() {
 		return s;
@@ -52,6 +52,14 @@ public abstract class GameObject {
 
 	public void setId(ObjectId id) {
 		this.id = id;
+	}
+	
+	public Collider getCollider() {
+		return collider;
+	}
+
+	public void setCollider(Collider collider) {
+		this.collider = collider;
 	}
 
 	public ObjectId getId(){

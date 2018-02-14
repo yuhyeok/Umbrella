@@ -9,8 +9,13 @@ import java.awt.image.BufferStrategy;
 
 import javax.swing.JFrame;
 
+import game.helpers.collision.Collider;
+import game.helpers.geometry.Point;
+import game.helpers.geometry.Vector;
 import game.input.KeyInput;
 import game.structure.Handler;
+import game.structure.ObjectId;
+import game.structure.Player;
 import game.visual.BufferedImageLoader;
 import game.visual.Textures;
 
@@ -30,6 +35,8 @@ public class Game extends Canvas implements Runnable{
 	static Handler handler;
 	Textures tex;
 
+	static Player player;
+	
 	public void init(){	
 		BufferedImageLoader loader = new BufferedImageLoader();
 		try{
@@ -42,7 +49,13 @@ public class Game extends Canvas implements Runnable{
 		
 		tex = new Textures(this);
 		
-		handler = new Handler(tex, this);
+		handler = new Handler();
+		
+		player = new Player(new Vector(100, 100), new Vector(0, 0), new Vector(0, 0), ObjectId.Player);
+		Point[] playerCollider = {new Point(0, 0), new Point(30, 0), new Point(30, 40), new Point(0, 40)};
+		player.setCollider(new Collider(4, playerCollider, Color.RED));
+		player.getCollider().setRefPoint(new Point(player.getS().x, player.getS().y));
+		handler.addObject(player);
 		
 		addKeyListener(new KeyInput(handler));
 	}
